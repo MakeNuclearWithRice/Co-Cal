@@ -1,4 +1,4 @@
-package com.cocal.auth.dto.google;
+package com.cocal.auth.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class GoogleTokenResponse {
+public class GoogleToken {
 
     private String accessToken;
 

@@ -3,7 +3,6 @@ package com.cocal.auth.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.util.internal.SerializationUtil;
 import org.springframework.util.SerializationUtils;
 
 import java.util.Base64;
