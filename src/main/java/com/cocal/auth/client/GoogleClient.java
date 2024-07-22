@@ -1,8 +1,9 @@
 package com.cocal.auth.client;
 
-import com.cocal.auth.dto.google.GoogleClientProperties;
-import com.cocal.auth.dto.google.GoogleTokenResponse;
+import com.cocal.auth.properties.GoogleClientProperties;
+import com.cocal.auth.dto.GoogleToken;
 import com.cocal.auth.dto.User;
+import com.cocal.auth.service.OAuth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GoogleClient{
+public class GoogleClient implements AuthClientIfs{
 
     @Value("${spring.security.oauth2.client.provider.google.authorization-uri}")
     private String googleAuthUri;
@@ -27,11 +28,12 @@ public class GoogleClient{
     private String googleTokenUri;
 
     @Value("${spring.security.oauth2.client.provider.google.user-info-uri}")
-    private String googleEmailUri;
+    private String googleUserInfoUri;
 
     private final GoogleClientProperties googleClientProperties;
 
 
+    @Override
     public String generateUrl() {
         return UriComponentsBuilder.fromUriString(googleAuthUri)
                 .queryParams(googleClientProperties.getGoogleCodeParam())
@@ -40,7 +42,7 @@ public class GoogleClient{
                 .toUriString();
     }
 
-
+    @Override
     public String getToken(String code) {
         var uri = UriComponentsBuilder.fromUriString(googleTokenUri)
                 .encode()
@@ -50,18 +52,20 @@ public class GoogleClient{
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         var httpEntity = new HttpEntity<>(googleClientProperties.getGoogleTokenParam(code), headers);
-        var responseType = new ParameterizedTypeReference<GoogleTokenResponse>() {};
+        var responseType = new ParameterizedTypeReference<GoogleToken>() {};
         var responseEntity = new RestTemplate().exchange(
                 uri,
                 HttpMethod.POST,
                 httpEntity,
                 responseType);
-        var googleTokenResponse = responseEntity.getBody();
+        var googleToken = responseEntity.getBody();
 
-        return googleTokenResponse.getAccessToken();
+        return googleToken.getAccessToken();
     }
+
+    @Override
     public User getUserInfo(String accessToken){
-        var uri = UriComponentsBuilder.fromUriString(googleEmailUri)
+        var uri = UriComponentsBuilder.fromUriString(googleUserInfoUri)
                 .encode()
                 .build()
                 .toUri();
@@ -75,8 +79,15 @@ public class GoogleClient{
                 httpEntity,
                 responseType
         );
+        log.info("I am google");
+
 
         return responseEntity.getBody();
+    }
+
+    @Override
+    public OAuth getPlatform() {
+        return OAuth.GOOGLE;
     }
 
 
